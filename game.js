@@ -42,7 +42,6 @@ const uiProveTokens = document.getElementById("proveTokens");
 let wallSpawnTimer = 0;
 // Yeni: Yumurtanın fırlatıldığı top pozisyonu ve açısı
 const launcherPos = { x: 100, y: canvasHeight - 100 };
-let launcherAngle = Math.PI / 4;  // Başlangıç 45 derece
 const minAngle = 0;               // Yatay
 const maxAngle = Math.PI / 2;    // Dikey
 let goldenSpawnTimer = 0;
