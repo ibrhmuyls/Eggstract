@@ -124,24 +124,21 @@ function updateAim(e) {
   if (!isCharging) return;
 
   const pos = getPointerPos(e);
-  // Canvas üzerindeki fırlatıcı merkezi ile dokunma noktası arasındaki fark
   const dx = pos.x - launcherPos.x;
-  const dy = pos.y - launcherPos.y;
+  const dy = launcherPos.y - pos.y;
 
-  // Tek bir açı: atan2(dy, dx)
-  let angle = Math.atan2(dy, dx);
+  // Yatay açı hesapla
+  const targetAngleH = Math.min(maxAngleHorizontal, Math.max(-maxAngleHorizontal, Math.atan2(0, dx)));
+  // Dikey açı hesapla
+  let targetAngleV = Math.atan2(dy, dx);
+  if (targetAngleV < minAngleVertical) targetAngleV = minAngleVertical;
+  if (targetAngleV > maxAngleVertical) targetAngleV = maxAngleVertical;
 
-  // Namlu sadece belli bir aralıkta dönsün istiyorsan burda clamp et
-  const min = -Math.PI/4;  // örneğin -45°
-  const max =  Math.PI/2;  // örneğin +90°
-  angle = Math.max(min, Math.min(max, angle));
-
-  // Eğer yumuşak geçiş istiyorsan:
-  launcherAngle = lerp(launcherAngle, angle, 0.2);
-  // Anında dönmesini istersen direkt atayın:
-  // launcherAngle = angle;
+  // Yumuşak geçiş için lerp uygula, t parametresi (0-1 arası) yumuşatma miktarıdır
+  const smoothing = 0.15; // %15 oranında yumuşatıyor, ihtiyaca göre ayarla
+  launcherAngleHorizontal = lerp(launcherAngleHorizontal, targetAngleH, smoothing);
+  launcherAngleVertical = lerp(launcherAngleVertical, targetAngleV, smoothing);
 }
-
 
 function releaseShot(e) {
   if (gameOver || !canShoot || !isCharging) return;
@@ -745,28 +742,43 @@ function spawnGoldenToken() {
   goldenTokens.push(new GoldenToken(x, -40));
 }
 function drawLauncher() {
-  const baseImg   = eggSprites["launcher_base"];
+  const baseImg = eggSprites["launcher_base"];
   const barrelImg = eggSprites["launcher_barrel"];
+
   if (!baseImg || !barrelImg) return;
 
-  // Namlu pivot noktasına taşı
+  const barrelWidth = 120;
+  const barrelHeight = 100;
+  const baseWidth = 80;
+  const baseHeight = 80;
+
+  // Gövde sabit çizilir
+  ctx.drawImage(baseImg, launcherPos.x - baseWidth / 2, launcherPos.y - baseHeight / 2, baseWidth, baseHeight);
+
+  // Namlu çizimi ve namlu ucunu hesapla
   ctx.save();
   ctx.translate(launcherPos.x, launcherPos.y);
-  ctx.rotate(launcherAngle);
+  ctx.rotate(-launcherAngleHorizontal);
+  ctx.rotate(-launcherAngleVertical);
 
-  // Namlu çizimi (barrelOffset değerlerini ince ayarla)
-  ctx.drawImage(barrelImg, -10, -50, 120, 100);
+  const barrelOffsetX = -1;
+  const barrelOffsetY = -barrelHeight / 1.1;
 
-  // Namlu ucunu hesapla (barrelOffset ve boyutlara göre)
-  barrelEnd.x = launcherPos.x + Math.cos(launcherAngle) * 100;
-  barrelEnd.y = launcherPos.y + Math.sin(launcherAngle) * 100;
+  ctx.drawImage(barrelImg, barrelOffsetX, barrelOffsetY, barrelWidth, barrelHeight);
+
+  // Namlu ucunu hesapla (barrel görüntüsünün ucundaki bir nokta)
+  const endLocalX = barrelOffsetX + barrelWidth - 10; // biraz içeriden
+  const endLocalY = barrelOffsetY + barrelHeight * 0.25;
+
+  const angle = -launcherAngleHorizontal - launcherAngleVertical;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+
+  barrelEnd.x = launcherPos.x + endLocalX * cos - endLocalY * sin;
+  barrelEnd.y = launcherPos.y + endLocalX * sin + endLocalY * cos;
 
   ctx.restore();
-
-  // Gövdeyi aşağıda çizmek istersen yine benzer şekilde:
-  ctx.drawImage(baseImg, launcherPos.x - 40, launcherPos.y - 40, 80, 80);
 }
-
 
 startGameBtn.addEventListener("click", () => {
   startOverlay.style.display = "none"; // Başlat ekranını gizle
