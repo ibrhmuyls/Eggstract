@@ -7,7 +7,6 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const finalStats = document.getElementById("finalStats");
 const restartBtn = document.getElementById("restartBtn");
 let slingshotLevel = 1;
-let launcherAngle = 0;  
 const maxSlingshotLevel = 5;
 const upgradeBtn = document.getElementById("upgradeBtn");
 let proveTokens = 0; // Prove token sayısı
@@ -20,10 +19,14 @@ let tokenFallSpeedMultiplier = 1;
 let lastBoxTime = 100;
 let specialShotReady = false;
 let canShoot = true;
+let launcherAngleVertical = Math.PI / 4;  // 45 derece yukarı/aşağı
 let goldenMessageTimer = 0;
 let goldenMessageAlpha = 1;
-const launcherPos = { x: 120, y: canvasHeight - 120 };
+const minAngleVertical = 0;               // yatay
+const maxAngleVertical = Math.PI / 2;    // dikey
 const uiPower = document.getElementById("uiPower");
+let launcherAngleHorizontal = 0;          // 0 ortada, -45° sol, +45° sağ
+const maxAngleHorizontal = Math.PI / 4;   // 45 derece sağ-sol sınırı
 let confettis = []; // 🎉 Eksik olan bu
 let power = 0;                           // basınç gücü (0 - maxPower)
 const maxPower = 25;
@@ -37,6 +40,8 @@ const WALL_X = canvasWidth - 40;
 const uiProveTokens = document.getElementById("proveTokens");
 let wallSpawnTimer = 0;
 // Yeni: Yumurtanın fırlatıldığı top pozisyonu ve açısı
+const launcherPos = { x: 100, y: canvasHeight - 100 };
+let launcherAngle = Math.PI / 4;  // Başlangıç 45 derece
 const minAngle = 0;               // Yatay
 const maxAngle = Math.PI / 2;    // Dikey
 let goldenSpawnTimer = 0;
@@ -120,20 +125,19 @@ function updateAim(e) {
 
   const pos = getPointerPos(e);
   const dx = pos.x - launcherPos.x;
-  const dy = pos.y - launcherPos.y;
+  const dy = launcherPos.y - pos.y;
 
-  // Dokunulan noktaya direkt açı:
-  let angle = Math.atan2(dy, dx);
+  // Yatay açı hesapla
+  const targetAngleH = Math.min(maxAngleHorizontal, Math.max(-maxAngleHorizontal, Math.atan2(0, dx)));
+  // Dikey açı hesapla
+  let targetAngleV = Math.atan2(dy, dx);
+  if (targetAngleV < minAngleVertical) targetAngleV = minAngleVertical;
+  if (targetAngleV > maxAngleVertical) targetAngleV = maxAngleVertical;
 
-  // İstersen sınırlama (ÇOK SAĞA/SOLA dönmesin):
-  const min = -Math.PI * 0.75;  // örn. -135°
-  const max =  Math.PI * 0.25;  // örn. +45°
-  angle = Math.max(min, Math.min(max, angle));
-
-  // Yumuşak geçiş:
-  launcherAngle = lerp(launcherAngle, angle, 0.2);
-  // Anında dönmesini istersen bir alt satırı aktif et:
-  // launcherAngle = angle;
+  // Yumuşak geçiş için lerp uygula, t parametresi (0-1 arası) yumuşatma miktarıdır
+  const smoothing = 0.15; // %15 oranında yumuşatıyor, ihtiyaca göre ayarla
+  launcherAngleHorizontal = lerp(launcherAngleHorizontal, targetAngleH, smoothing);
+  launcherAngleVertical = lerp(launcherAngleVertical, targetAngleV, smoothing);
 }
 
 function releaseShot(e) {
@@ -146,13 +150,18 @@ function releaseShot(e) {
   specialShotReady = false;
 
   for (let i = 0; i < count; i++) {
+    const angleOffsetVertical = (i - (count - 1) / 2) * 0.05;
+    const angleOffsetHorizontal = (i - (count - 1) / 2) * 0.05;
+
+    const angleV = launcherAngleVertical + angleOffsetVertical;
+    const angleH = launcherAngleHorizontal + angleOffsetHorizontal;
+
     const speed = Math.min(power, maxPower);
 
-    // Tek açı üzerinden hız bileşenleri:
-    const vx = speed * Math.cos(launcherAngle);
-    const vy = -speed * Math.sin(launcherAngle);
+    const vx = speed * Math.cos(angleV) * Math.cos(angleH);
+    const vy = -speed * Math.sin(angleV);
 
-    // Namlu ucunu güncelle ve fırlat
+    const barrelLength = 100;
     drawLauncher();
     const launchX = barrelEnd.x;
     const launchY = barrelEnd.y;
@@ -164,15 +173,14 @@ function releaseShot(e) {
   uiShots.textContent = 60 - shots;
   glowCounter("shots");
 
-  score = Math.max(0, score - count);
+  score -= count;
+  if (score < 0) score = 0;
   uiScore.textContent = score;
 
   power = 0;
   previewEggColor = eggColors[Math.floor(Math.random() * eggColors.length)];
   setTimeout(() => canShoot = true, 300);
 }
-
-
 
 function updateUpgradeButtonGlow() {
   const costs = [0, 5, 15, 25, 50, 100];
@@ -733,53 +741,44 @@ function spawnGoldenToken() {
   const x = 100 + Math.random() * (canvasWidth - 200);
   goldenTokens.push(new GoldenToken(x, -40));
 }
-
-// 2) updateAim’i komple değiştir:
-function updateAim(e) {
-  if (!isCharging) return;
-
-  const pos = getPointerPos(e);
-  const dx = pos.x - launcherPos.x;
-  const dy = pos.y - launcherPos.y;
-
-  // Dokunulan noktaya direkt açı:
-  let angle = Math.atan2(dy, dx);
-
-  // İstersen sınırlama (ÇOK SAĞA/SOLA dönmesin):
-  const min = -Math.PI * 0.75;  // örn. -135°
-  const max =  Math.PI * 0.25;  // örn. +45°
-  angle = Math.max(min, Math.min(max, angle));
-
-  // Yumuşak geçiş:
-  launcherAngle = lerp(launcherAngle, angle, 0.2);
-  // Anında dönmesini istersen bir alt satırı aktif et:
-  // launcherAngle = angle;
-}
-
-// 3) drawLauncher’ı da buna göre uyarlayın:
 function drawLauncher() {
-  const baseImg   = eggSprites["launcher_base"];
+  const baseImg = eggSprites["launcher_base"];
   const barrelImg = eggSprites["launcher_barrel"];
+
   if (!baseImg || !barrelImg) return;
 
-  // Önce gövdeyi çiz:
-  ctx.drawImage(baseImg, launcherPos.x - 40, launcherPos.y - 40, 80, 80);
+  const barrelWidth = 120;
+  const barrelHeight = 100;
+  const baseWidth = 80;
+  const baseHeight = 80;
 
-  // Sonra namluyu pivot etrafında döndür:
+  // Gövde sabit çizilir
+  ctx.drawImage(baseImg, launcherPos.x - baseWidth / 2, launcherPos.y - baseHeight / 2, baseWidth, baseHeight);
+
+  // Namlu çizimi ve namlu ucunu hesapla
   ctx.save();
   ctx.translate(launcherPos.x, launcherPos.y);
-  ctx.rotate(launcherAngle);
+  ctx.rotate(-launcherAngleHorizontal);
+  ctx.rotate(-launcherAngleVertical);
 
-  // Namlu resmi:
-  ctx.drawImage(barrelImg, -10, -50, 120, 100);
+  const barrelOffsetX = -1;
+  const barrelOffsetY = -barrelHeight / 1.1;
 
-  // Namlu ucunu hesapla (fırlatma noktasını belirlemek için):
-  barrelEnd.x = launcherPos.x + Math.cos(launcherAngle) * 75;
-  barrelEnd.y = launcherPos.y + Math.sin(launcherAngle) * 75;
+  ctx.drawImage(barrelImg, barrelOffsetX, barrelOffsetY, barrelWidth, barrelHeight);
+
+  // Namlu ucunu hesapla (barrel görüntüsünün ucundaki bir nokta)
+  const endLocalX = barrelOffsetX + barrelWidth - 10; // biraz içeriden
+  const endLocalY = barrelOffsetY + barrelHeight * 0.25;
+
+  const angle = -launcherAngleHorizontal - launcherAngleVertical;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+
+  barrelEnd.x = launcherPos.x + endLocalX * cos - endLocalY * sin;
+  barrelEnd.y = launcherPos.y + endLocalX * sin + endLocalY * cos;
 
   ctx.restore();
 }
-
 
 startGameBtn.addEventListener("click", () => {
   startOverlay.style.display = "none"; // Başlat ekranını gizle
@@ -818,6 +817,8 @@ restartBtn.addEventListener("click", () => {
   isCharging = false;
   chargeStartTime = null;
   power = 0;
+  launcherAngleVertical = Math.PI / 4;
+  launcherAngleHorizontal = 0;
   goldenMessageTimer = 0;
   goldenMessageAlpha = 1;
 tokenSpawnMultiplier = 1;
