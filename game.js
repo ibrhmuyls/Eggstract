@@ -64,7 +64,7 @@ const updateUpgradeButtonText = () => {
     upgradeBtn.classList.remove("upgrade-glow");
   } else {
     const nextCost = costs[nextLevel];
-    upgradeBtn.textContent = `Upgrade Slingshot (Lv: ${slingshotLevel}) - Cost: ${nextCost}`;
+    upgradeBtn.textContent = `Upgrade Launcher (Lv: ${slingshotLevel}) - Cost: ${nextCost}`;
   }
 };
 
