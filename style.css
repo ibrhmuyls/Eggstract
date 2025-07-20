@@ -5,18 +5,22 @@ body {
   font-family: 'Orbitron', 'Poppins', sans-serif;
   background: linear-gradient(145deg, #fff5f9, #ffe4f0);
   color: #fff;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 canvas {
-  width: 100%;         /* Genişliği ekran genişliğine göre otomatik */
-  max-width: 1200px;   /* Maksimum genişlik orijinal 1200px */
-  height: auto;        /* Oranları koru */
+  width: 100%;               /* Ekran genişliğine göre tam genişlik */
+  max-width: 1200px;         /* Maksimum PC genişliği */
+  height: auto;              /* Oranları koru */
   display: block;
-  margin: 20px auto;   /* Üst-alt boşluk da ekledim */
+  margin: 20px auto;
   background: linear-gradient(to bottom, #2e002e, #000);
   border: 2px solid #ff99cc;
   box-shadow: 0 0 30px rgba(255, 128, 171, 0.4);
   border-radius: 12px;
+  touch-action: none;        /* Mobilde canvas içi kaydırma engelleme */
 }
 
 #ui {
@@ -39,9 +43,10 @@ canvas {
   user-select: none;
   font-weight: 700;
   border: 1px solid rgba(255, 182, 193, 0.3);
-  max-width: 90vw; /* Taşma önleme */
+  max-width: 90vw;       /* Taşmayı önle */
   white-space: nowrap;
-  overflow-x: auto; /* Taşarsa kaydır */
+  overflow-x: auto;      /* Taşarsa yatay kaydır */
+  -webkit-overflow-scrolling: touch; /* Mobilde momentum scroll */
 }
 
 #ui span {
@@ -85,8 +90,9 @@ canvas {
   box-shadow: 0 0 12px rgba(240, 98, 146, 0.3);
   text-shadow: 0 0 4px #ff99cc;
   transition: all 0.3s ease;
+  user-select: none;
+  z-index: 9;
 }
-
 
 #gameOverScreen {
   position: fixed;
@@ -131,6 +137,7 @@ canvas {
   cursor: pointer;
   box-shadow: 0 0 10px #ff99cc;
   transition: background-color 0.3s ease;
+  font-family: 'Orbitron', 'Poppins', sans-serif;
 }
 
 #gameOverScreen button:hover {
@@ -179,10 +186,10 @@ button {
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
-}
-button {
   font-family: 'Orbitron', 'Poppins', sans-serif;
+  user-select: none;
 }
+
 button:hover {
   background-color: #ff66a3;
   transform: scale(1.05);
@@ -201,6 +208,7 @@ button:hover {
   animation: glow 1s infinite;
 }
 
+/* ========== MOBİL ÖZEL ========== */
 @media (max-width: 600px) {
   #launcherStats {
     position: fixed !important;
@@ -209,6 +217,8 @@ button:hover {
     font-size: 14px !important;
     padding: 4px 8px !important;
     background: rgba(136, 14, 79, 0.3) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 8px rgba(240, 98, 146, 0.25) !important;
   }
   
   #upgradeBtn {
@@ -218,15 +228,58 @@ button:hover {
     font-size: 14px !important;
     padding: 6px 12px !important;
     border-radius: 8px !important;
+    box-shadow: 0 0 10px #ff99cc !important;
   }
   
   #ui {
     font-size: 14px !important;
     padding: 6px 12px !important;
+    max-width: 95vw !important;
+    gap: 8px !important;
+  }
+  
+  #ui span {
+    font-size: 16px !important;
+    padding: 3px 6px !important;
   }
   
   button {
     font-size: 14px !important;
     padding: 8px 14px !important;
+    border-radius: 8px !important;
+  }
+  
+  #gameOverScreen {
+    max-width: 90vw !important;
+    padding: 20px 16px !important;
+  }
+  
+  #gameOverScreen h2 {
+    font-size: 22px !important;
+    margin-bottom: 14px !important;
+  }
+  
+  #gameOverScreen .final-score {
+    font-size: 18px !important;
+    margin: 12px 0 20px !important;
+  }
+  
+  #finalStats {
+    font-size: 18px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  #finalStats p {
+    font-size: 18px !important;
+    padding: 8px 12px !important;
+  }
+  
+  #finalStats p span {
+    font-size: 20px !important;
+  }
+  
+  #finalMessage {
+    font-size: 20px !important;
+    margin-top: 8px !important;
   }
 }
