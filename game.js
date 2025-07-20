@@ -22,10 +22,8 @@ let specialShotReady = false;
 let canShoot = true;
 let goldenMessageTimer = 0;
 let goldenMessageAlpha = 1;
-const minAngleVertical = 0;               // yatay
-const maxAngleVertical = Math.PI / 2;    // dikey
+
 const uiPower = document.getElementById("uiPower");
-const maxAngleHorizontal = Math.PI / 4;   // 45 derece sağ-sol sınırı
 let confettis = []; // 🎉 Eksik olan bu
 let power = 0;                           // basınç gücü (0 - maxPower)
 const maxPower = 25;
@@ -148,24 +146,32 @@ function releaseShot(e) {
   specialShotReady = false;
 
   for (let i = 0; i < count; i++) {
-    const angleOffsetVertical = (i - (count - 1) / 2) * 0.05;
-    const angleOffsetHorizontal = (i - (count - 1) / 2) * 0.05;
-
-    const angleV = launcherAngleVertical + angleOffsetVertical;
-    const angleH = launcherAngleHorizontal + angleOffsetHorizontal;
-
     const speed = Math.min(power, maxPower);
 
-    const vx = speed * Math.cos(angleV) * Math.cos(angleH);
-    const vy = -speed * Math.sin(angleV);
+    // Tek açı üzerinden hız bileşenleri:
+    const vx = speed * Math.cos(launcherAngle);
+    const vy = -speed * Math.sin(launcherAngle);
 
-    const barrelLength = 100;
+    // Namlu ucunu güncelle ve fırlat
     drawLauncher();
     const launchX = barrelEnd.x;
     const launchY = barrelEnd.y;
 
     eggs.push(new Egg(launchX, launchY, vx, vy, previewEggColor));
   }
+
+  shots++;
+  uiShots.textContent = 60 - shots;
+  glowCounter("shots");
+
+  score = Math.max(0, score - count);
+  uiScore.textContent = score;
+
+  power = 0;
+  previewEggColor = eggColors[Math.floor(Math.random() * eggColors.length)];
+  setTimeout(() => canShoot = true, 300);
+}
+
 
   shots++;
   uiShots.textContent = 60 - shots;
@@ -739,8 +745,6 @@ function spawnGoldenToken() {
   const x = 100 + Math.random() * (canvasWidth - 200);
   goldenTokens.push(new GoldenToken(x, -40));
 }
-// 1) Tek açı saklayacağız:
-let launcherAngle = 0;  
 
 // 2) updateAim’i komple değiştir:
 function updateAim(e) {
