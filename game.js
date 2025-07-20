@@ -22,7 +22,7 @@ let specialShotReady = false;
 let canShoot = true;
 let goldenMessageTimer = 0;
 let goldenMessageAlpha = 1;
-
+const launcherPos = { x: 120, y: canvasHeight - 120 };
 const uiPower = document.getElementById("uiPower");
 let confettis = []; // 🎉 Eksik olan bu
 let power = 0;                           // basınç gücü (0 - maxPower)
@@ -173,18 +173,6 @@ function releaseShot(e) {
 }
 
 
-  shots++;
-  uiShots.textContent = 60 - shots;
-  glowCounter("shots");
-
-  score -= count;
-  if (score < 0) score = 0;
-  uiScore.textContent = score;
-
-  power = 0;
-  previewEggColor = eggColors[Math.floor(Math.random() * eggColors.length)];
-  setTimeout(() => canShoot = true, 300);
-}
 
 function updateUpgradeButtonGlow() {
   const costs = [0, 5, 15, 25, 50, 100];
@@ -830,8 +818,6 @@ restartBtn.addEventListener("click", () => {
   isCharging = false;
   chargeStartTime = null;
   power = 0;
-  launcherAngleVertical = Math.PI / 4;
-  launcherAngleHorizontal = 0;
   goldenMessageTimer = 0;
   goldenMessageAlpha = 1;
 tokenSpawnMultiplier = 1;
