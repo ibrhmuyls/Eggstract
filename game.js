@@ -7,6 +7,7 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const finalStats = document.getElementById("finalStats");
 const restartBtn = document.getElementById("restartBtn");
 let slingshotLevel = 1;
+let launcherAngle = 0;  
 const maxSlingshotLevel = 5;
 const upgradeBtn = document.getElementById("upgradeBtn");
 let proveTokens = 0; // Prove token sayısı
@@ -125,19 +126,20 @@ function updateAim(e) {
 
   const pos = getPointerPos(e);
   const dx = pos.x - launcherPos.x;
-  const dy = launcherPos.y - pos.y;
+  const dy = pos.y - launcherPos.y;
 
-  // Yatay açı hesapla
-  const targetAngleH = Math.min(maxAngleHorizontal, Math.max(-maxAngleHorizontal, Math.atan2(0, dx)));
-  // Dikey açı hesapla
-  let targetAngleV = Math.atan2(dy, dx);
-  if (targetAngleV < minAngleVertical) targetAngleV = minAngleVertical;
-  if (targetAngleV > maxAngleVertical) targetAngleV = maxAngleVertical;
+  // Dokunulan noktaya direkt açı:
+  let angle = Math.atan2(dy, dx);
 
-  // Yumuşak geçiş için lerp uygula, t parametresi (0-1 arası) yumuşatma miktarıdır
-  const smoothing = 0.15; // %15 oranında yumuşatıyor, ihtiyaca göre ayarla
-  launcherAngleHorizontal = lerp(launcherAngleHorizontal, targetAngleH, smoothing);
-  launcherAngleVertical = lerp(launcherAngleVertical, targetAngleV, smoothing);
+  // İstersen sınırlama (ÇOK SAĞA/SOLA dönmesin):
+  const min = -Math.PI * 0.75;  // örn. -135°
+  const max =  Math.PI * 0.25;  // örn. +45°
+  angle = Math.max(min, Math.min(max, angle));
+
+  // Yumuşak geçiş:
+  launcherAngle = lerp(launcherAngle, angle, 0.2);
+  // Anında dönmesini istersen bir alt satırı aktif et:
+  // launcherAngle = angle;
 }
 
 function releaseShot(e) {
@@ -741,44 +743,55 @@ function spawnGoldenToken() {
   const x = 100 + Math.random() * (canvasWidth - 200);
   goldenTokens.push(new GoldenToken(x, -40));
 }
-function drawLauncher() {
-  const baseImg = eggSprites["launcher_base"];
-  const barrelImg = eggSprites["launcher_barrel"];
+// 1) Tek açı saklayacağız:
+let launcherAngle = 0;  
 
+// 2) updateAim’i komple değiştir:
+function updateAim(e) {
+  if (!isCharging) return;
+
+  const pos = getPointerPos(e);
+  const dx = pos.x - launcherPos.x;
+  const dy = pos.y - launcherPos.y;
+
+  // Dokunulan noktaya direkt açı:
+  let angle = Math.atan2(dy, dx);
+
+  // İstersen sınırlama (ÇOK SAĞA/SOLA dönmesin):
+  const min = -Math.PI * 0.75;  // örn. -135°
+  const max =  Math.PI * 0.25;  // örn. +45°
+  angle = Math.max(min, Math.min(max, angle));
+
+  // Yumuşak geçiş:
+  launcherAngle = lerp(launcherAngle, angle, 0.2);
+  // Anında dönmesini istersen bir alt satırı aktif et:
+  // launcherAngle = angle;
+}
+
+// 3) drawLauncher’ı da buna göre uyarlayın:
+function drawLauncher() {
+  const baseImg   = eggSprites["launcher_base"];
+  const barrelImg = eggSprites["launcher_barrel"];
   if (!baseImg || !barrelImg) return;
 
-  const barrelWidth = 120;
-  const barrelHeight = 100;
-  const baseWidth = 80;
-  const baseHeight = 80;
+  // Önce gövdeyi çiz:
+  ctx.drawImage(baseImg, launcherPos.x - 40, launcherPos.y - 40, 80, 80);
 
-  // Gövde sabit çizilir
-  ctx.drawImage(baseImg, launcherPos.x - baseWidth / 2, launcherPos.y - baseHeight / 2, baseWidth, baseHeight);
-
-  // Namlu çizimi ve namlu ucunu hesapla
+  // Sonra namluyu pivot etrafında döndür:
   ctx.save();
   ctx.translate(launcherPos.x, launcherPos.y);
-  ctx.rotate(-launcherAngleHorizontal);
-  ctx.rotate(-launcherAngleVertical);
+  ctx.rotate(launcherAngle);
 
-  const barrelOffsetX = -1;
-  const barrelOffsetY = -barrelHeight / 1.1;
+  // Namlu resmi:
+  ctx.drawImage(barrelImg, -10, -50, 120, 100);
 
-  ctx.drawImage(barrelImg, barrelOffsetX, barrelOffsetY, barrelWidth, barrelHeight);
-
-  // Namlu ucunu hesapla (barrel görüntüsünün ucundaki bir nokta)
-  const endLocalX = barrelOffsetX + barrelWidth - 10; // biraz içeriden
-  const endLocalY = barrelOffsetY + barrelHeight * 0.25;
-
-  const angle = -launcherAngleHorizontal - launcherAngleVertical;
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-
-  barrelEnd.x = launcherPos.x + endLocalX * cos - endLocalY * sin;
-  barrelEnd.y = launcherPos.y + endLocalX * sin + endLocalY * cos;
+  // Namlu ucunu hesapla (fırlatma noktasını belirlemek için):
+  barrelEnd.x = launcherPos.x + Math.cos(launcherAngle) * 75;
+  barrelEnd.y = launcherPos.y + Math.sin(launcherAngle) * 75;
 
   ctx.restore();
 }
+
 
 startGameBtn.addEventListener("click", () => {
   startOverlay.style.display = "none"; // Başlat ekranını gizle
