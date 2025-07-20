@@ -126,19 +126,23 @@ function updateAim(e) {
   const pos = getPointerPos(e);
   const dx = pos.x - launcherPos.x;
   const dy = launcherPos.y - pos.y;
-if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return; // küçük hareketleri yok say
-  // Yatay açı hesapla
-  const targetAngleH = Math.min(maxAngleHorizontal, Math.max(-maxAngleHorizontal, Math.atan2(dx, launcherPos.y - pos.y)));
-  // Dikey açı hesapla
-  let targetAngleV = Math.atan2(dy, dx);
-  if (targetAngleV < minAngleVertical) targetAngleV = minAngleVertical;
-  if (targetAngleV > maxAngleVertical) targetAngleV = maxAngleVertical;
 
-  // Yumuşak geçiş için lerp uygula, t parametresi (0-1 arası) yumuşatma miktarıdır
-  const smoothing = 0.15; // %15 oranında yumuşatıyor, ihtiyaca göre ayarla
-  launcherAngleHorizontal = lerp(launcherAngleHorizontal, targetAngleH, smoothing);
-  launcherAngleVertical = lerp(launcherAngleVertical, targetAngleV, smoothing);
+  if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return; // küçük hareketleri yok say
+
+  // Doğru yatay açı hesapla
+  const rawHorizontal = Math.atan2(dx, dy); // dx sağa pozitif, dy yukarı pozitif
+  const clampedHorizontal = Math.max(-maxAngleHorizontal, Math.min(maxAngleHorizontal, rawHorizontal));
+
+  // Doğru dikey açı hesapla
+  let rawVertical = Math.atan2(dy, Math.abs(dx)); // düşey bileşeni
+  if (rawVertical < minAngleVertical) rawVertical = minAngleVertical;
+  if (rawVertical > maxAngleVertical) rawVertical = maxAngleVertical;
+
+  const smoothing = 0.15;
+  launcherAngleHorizontal = lerp(launcherAngleHorizontal, clampedHorizontal, smoothing);
+  launcherAngleVertical = lerp(launcherAngleVertical, rawVertical, smoothing);
 }
+
 
 function releaseShot(e) {
   if (gameOver || !canShoot || !isCharging) return;
