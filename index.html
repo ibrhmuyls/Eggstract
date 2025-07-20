@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Eggstract</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="launcherStats" style="position:absolute; left:155px; bottom:50px; font-size:20px; font-weight:bold; color:#222; background:white; padding:5px 10px; border-radius:10px; opacity:0.9;">
+  Power: <span id="uiPower">0</span>
+</div>
+<div id="startOverlay" style="
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255, 248, 253, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+">
+  <div style="
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    max-width: 500px;
+    text-align: center;
+    color: #880e4f;
+  ">
+    <h2 style="margin-bottom: 16px;">🥚 Welcome to Egg Launch!</h2>
+    <p style="font-size: 15px; margin-bottom: 10px;">🎯 You have <strong>180 seconds</strong> or <strong>60 shots</strong> to get the highest score possible.</p>
+    <p style="font-size: 15px; margin-bottom: 10px;">🪙 Earn tokens by hitting them with your eggs. Use tokens to upgrade your slingshot!</p>
+    <p style="font-size: 15px; margin-bottom: 10px;">🟡 Golden egg give bonus shots. Watch out for moving wall obstacles!</p>
+    <p style="font-size: 14px; margin-bottom: 20px; color: #6a1b9a;">🔥 Use your mouse to aim and hold to charge the power.</p>
+    <button id="startGameBtn" style="
+      padding: 10px 20px;
+      background-color: #c2185b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    ">
+      🚀 Start Game
+    </button>
+  </div>
+</div>
+<!-- Oyun üst kısmındaki bilgiler -->
+<div id="ui" style="position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:18px; color:#222;">
+  Time: <span id="time">100</span>s |
+  Points: <span id="score">0</span> |
+  Shots Left: <span id="shots">50</span> |
+  Prove Tokens: <span id="proveTokens">0</span>
+</div>
+
+<!-- Upgrade butonunu canvasın altında fırlatıcının hizasında yerleştiriyoruz -->
+<button id="upgradeBtn" style="
+  position:absolute;
+  left:155px;
+  bottom:80px;
+  font-size:16px;
+  padding:8px 15px;
+  border-radius:8px;
+  cursor:pointer;
+">
+  Upgrade Slingshot (Level: 1)
+</button>
+
+<div id="gameOverScreen" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border:2px solid #333; text-align:center; z-index:10;">
+  <h2>Game Over!</h2>
+  <div id="finalStats"></div>
+  <button id="restartBtn">Restart</button>
+</div>
+
+<canvas id="gameCanvas" width="1200" height="650"></canvas>
+
+<script src="game.js"></script>
+</body>
+</html>

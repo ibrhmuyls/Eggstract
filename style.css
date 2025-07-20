@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+body {
+  font-family: 'Orbitron', 'Poppins', sans-serif;
+  background: linear-gradient(145deg, #fff5f9, #ffe4f0);
+  color: #fff;
+}
+
+canvas {
+  width: 100%;         /* Genişliği ekran genişliğine göre otomatik */
+  max-width: 1200px;   /* Maksimum genişlik orijinal 1200px */
+  height: auto;        /* Oranları koru */
+  display: block;
+  margin: 20px auto;   /* Üst-alt boşluk da ekledim */
+  background: linear-gradient(to bottom, #2e002e, #000);
+  border: 2px solid #ff99cc;
+  box-shadow: 0 0 30px rgba(255, 128, 171, 0.4);
+  border-radius: 12px;
+}
+
+#ui {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #fff;
+  background: rgba(136, 14, 79, 0.2);
+  backdrop-filter: blur(6px);
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(255, 192, 203, 0.2);
+  z-index: 10;
+  user-select: none;
+  font-weight: 700;
+  border: 1px solid rgba(255, 182, 193, 0.3);
+  max-width: 90vw; /* Taşma önleme */
+  white-space: nowrap;
+  overflow-x: auto; /* Taşarsa kaydır */
+}
+
+#ui span {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: #ffccdd;
+  font-size: 18px;
+  font-weight: 700;
+  text-shadow: 0 0 6px #ff99cc;
+  transition: transform 0.2s ease;
+}
+
+#ui span.glow {
+  animation: glowPulse 1.2s infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px #ff80b3;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px #ff99cc;
+    transform: scale(1.05);
+  }
+}
+
+#launcherStats {
+  position: absolute;
+  left: 155px;
+  bottom: 50px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(136, 14, 79, 0.2);
+  backdrop-filter: blur(4px);
+  padding: 5px 12px;
+  border-radius: 10px;
+  opacity: 0.9;
+  box-shadow: 0 0 12px rgba(240, 98, 146, 0.3);
+  text-shadow: 0 0 4px #ff99cc;
+  transition: all 0.3s ease;
+}
+
+
+#gameOverScreen {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(10, 0, 10, 0.95);
+  border: 2px solid #ff99cc;
+  border-radius: 18px;
+  padding: 25px 30px;
+  box-shadow: 0 0 25px rgba(255, 192, 203, 0.4);
+  max-width: 280px;
+  font-family: 'Orbitron', sans-serif;
+  color: #fff;
+  text-align: center;
+  z-index: 1000;
+}
+
+#gameOverScreen h2 {
+  color: #ff80b3;
+  font-size: 26px;
+  margin-bottom: 18px;
+  text-shadow: 0 0 5px #ff99cc;
+  font-weight: 700;
+}
+
+#gameOverScreen .final-score {
+  font-size: 22px;
+  color: #ffccdd;
+  font-weight: 900;
+  margin: 15px 0 25px;
+  text-shadow: 0 0 6px #ffb6c1;
+}
+
+#gameOverScreen button {
+  background-color: #ff66a3;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 28px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ff99cc;
+  transition: background-color 0.3s ease;
+}
+
+#gameOverScreen button:hover {
+  background-color: #ff3385;
+}
+
+#finalStats {
+  font-size: 20px;
+  color: #ffb6c1;
+  margin-bottom: 20px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#finalStats p {
+  background: rgba(255, 182, 193, 0.05);
+  padding: 10px 15px;
+  border-radius: 12px;
+  color: #ff99cc;
+  font-size: 22px;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(255, 182, 193, 0.1);
+}
+
+#finalStats p span {
+  color: #ff80b3;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+#finalMessage {
+  font-size: 22px;
+  font-weight: bold;
+  color: #ff80b3;
+  margin-top: 10px;
+}
+
+button {
+  font-size: 16px;
+  padding: 8px 16px;
+  background-color: #ff99cc;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+button {
+  font-family: 'Orbitron', 'Poppins', sans-serif;
+}
+button:hover {
+  background-color: #ff66a3;
+  transform: scale(1.05);
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px 2px rgba(136, 14, 79, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 15px 5px rgba(136, 14, 79, 1);
+  }
+}
+
+.upgrade-glow {
+  animation: glow 1s infinite;
+}
+
+@media (max-width: 600px) {
+  #launcherStats {
+    position: fixed !important;
+    left: 10px !important;
+    bottom: 10px !important;
+    font-size: 14px !important;
+    padding: 4px 8px !important;
+    background: rgba(136, 14, 79, 0.3) !important;
+  }
+  
+  #upgradeBtn {
+    position: fixed !important;
+    left: 10px !important;
+    bottom: 50px !important;
+    font-size: 14px !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+  }
+  
+  #ui {
+    font-size: 14px !important;
+    padding: 6px 12px !important;
+  }
+  
+  button {
+    font-size: 14px !important;
+    padding: 8px 14px !important;
+  }
+}
