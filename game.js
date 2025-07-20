@@ -126,7 +126,7 @@ function updateAim(e) {
   const pos = getPointerPos(e);
   const dx = pos.x - launcherPos.x;
   const dy = launcherPos.y - pos.y;
-
+if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return; // küçük hareketleri yok say
   // Yatay açı hesapla
   const targetAngleH = Math.min(maxAngleHorizontal, Math.max(-maxAngleHorizontal, Math.atan2(0, dx)));
   // Dikey açı hesapla
