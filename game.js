@@ -121,8 +121,6 @@ function lerp(start, end, t) {
   return start + (end - start) * t;
 }
 function updateAim(e) {
-  if (!isCharging) return;
-
   const pos = getPointerPos(e);
   const dx = pos.x - launcherPos.x;
   const dy = launcherPos.y - pos.y;
